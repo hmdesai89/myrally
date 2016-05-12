@@ -1,0 +1,283 @@
+#!/usr/bin/python
+
+import sys
+import getopt
+from myrally import hello 
+##from vpctools import vpc_users as VU
+##from openpyxl import load_workbook
+#
+#def help_display():
+#    print "\n"
+#    print "Usage: vpcweeklystats -w <path to excel workbook> -e <sheet name with external ids> -i <sheet name with internal ids> -x <cells in external sheet> -n <cells in internal sheet> -c <column to populate>"
+#    print "\n-h or --help\t\thelp"
+#    print "\nMandatory parameters:"
+#    print "-w or --workbook\t\tExcel workbook to use for populating data and getting list of account ids"
+#    print "-E or --ecells\t\tList of cells in external customer sheet comma separated for eg. D6:E24,H5:G44"
+#    print "-I or --icells\t\tList of cells in internal customer sheet comma separated for eg. D6:E24,H5:G44"
+#    print "-c or --column\t\tColumn to populate"
+#    print "\nOptional parameters:"
+#    print "-e or --esheet\t\tSheet name with external customer ids. Default - External_Customer_ID"
+#    print "-i or --isheet\t\tSheet name with internal customer ids. Default - Internal_Customer_ID"
+#    print "-S or --summary\t\tPrints the data to stdout. Will not populate in sheet. Needs sheet data to process though"
+#    print "\n"
+#
+#def retrieve_custlist_stat_from_sheet(xlfile, sheet, cell_list, logging=False):
+#
+#    if xlfile == None or sheet == None or cell_list == None:
+#        print "Missing parameters"
+#        return None
+#
+#    try:
+#        wb = load_workbook(xlfile)
+#    except:
+#        print "Unable to load workbook {}".format(xlfile)
+#        return None
+#
+#    try:
+#        ws = wb.get_sheet_by_name(sheet)
+#    except:
+#        print "Unable to find or open sheet {}".format(sheet)
+#        return None
+#
+#    custidname = dict()
+#    idlist = list()
+#    total_cust = 0
+#
+#    cell_pairs = cell_list.rstrip().lstrip().split(",")
+#    for cell_pair in cell_pairs:
+#        cellrange = cell_pair.split(":")
+#        cells = ws[cellrange[0]:cellrange[1]]
+#
+#        for cell in cells:
+#            total_cust = total_cust + 1
+#            try:
+#                custname = str(cell[0].value)
+#            except:
+#                custname = "Unknown"
+#
+#            try:
+#                custid = str(cell[1].value)
+#            except:
+#                print "Unable to retrieve value from cell {}".format(cell[1])
+#                continue
+#
+#            custidname[custid.zfill(32)] = custname
+#            idlist.append(custid)
+#        
+#
+#    data = VU.get_userlist_stats("prod", idlist, logging)
+#    custlist = data[VU.CL]
+#    for custid in custlist.keys():
+#        custlist[custid]["name"] = custidname[custid]
+#
+#    top5 = VU.get_toplist(custlist, "Total", 5, False)
+#    data[VU.TFIVE] = top5
+#    return data
+#
+#def populate_intcustomer_data(xlfile, data, column):
+#
+#    if xlfile == None or column == None or data == None:
+#        print "Missing parameters"
+#        return None
+#
+#    try:
+#        wb = load_workbook(xlfile)
+#    except:
+#        print "Unable to load workbook {}".format(xlfile)
+#        return None
+#
+#    try:
+#        ws = wb.get_sheet_by_name("VPC")
+#    except:
+#        print "Unable to find or open sheet VPC"
+#        return None
+#
+#    ws[column+"12"] = int(data[VU.TC])
+#    ws[column+"13"] = int(data[VU.TCV])
+#    ws[column+"16"] = int(data[VU.TCC])
+#    ws[column+"17"] = int(data[VU.TCCV])
+#    ws[column+"18"] = float(data[VU.TCCV])/int(data[VU.TCC])
+#    ws[column+"33"] = int(data[VU.TV])
+#    ws[column+"35"] = float(data[VU.TV])/int(data[VU.TC])
+#    ws[column+"47"] = int(data[VU.TS])
+#    ws[column+"49"] = float(data[VU.TS])/int(data[VU.TV])
+#    ws[column+"61"] = int(data[VU.TSG])
+#    ws[column+"63"] = float(data[VU.TSG])/int(data[VU.TV])
+#    ws[column+"75"] = int(data[VU.TF])
+#    ws[column+"77"] = float(data[VU.TF])/int(data[VU.TC])
+#
+#    wb.save(xlfile)
+#
+#def populate_extcustomer_data(xlfile, data, column):
+#
+#    if xlfile == None or column == None or data == None:
+#        print "Missing parameters"
+#        return None
+#
+#    try:
+#        wb = load_workbook(xlfile)
+#    except:
+#        print "Unable to load workbook {}".format(xlfile)
+#        return None
+#
+#    try:
+#        ws = wb.get_sheet_by_name("VPC")
+#    except:
+#        print "Unable to find or open sheet VPC"
+#        return None
+#
+#    ws[column+"5"] = int(data[VU.TC])
+#    ws[column+"6"] = int(data[VU.TCV])
+#    ws[column+"9"] = int(data[VU.TCC])
+#    ws[column+"10"] = int(data[VU.TCCV])
+#    ws[column+"11"] = float(data[VU.TCCV])/int(data[VU.TCC])
+#    ws[column+"29"] = int(data[VU.TV])
+#    ws[column+"31"] = float(data[VU.TV])/int(data[VU.TC])
+#    ws[column+"43"] = int(data[VU.TS])
+#    ws[column+"45"] = float(data[VU.TS])/int(data[VU.TV])
+#    ws[column+"57"] = int(data[VU.TSG])
+#    ws[column+"59"] = float(data[VU.TSG])/int(data[VU.TV])
+#    ws[column+"71"] = int(data[VU.TF])
+#    ws[column+"73"] = float(data[VU.TF])/int(data[VU.TC])
+#
+#    top5 = data[VU.TFIVE]
+#    ws[column+"84"] = top5[0][1]["name"]
+#    ws[column+"85"] = int(top5[0][0])
+#    ws[column+"86"] = top5[0][1]["Numofvpcs"]
+#    ws[column+"87"] = top5[0][1]["Numofsubs"]
+#    ws[column+"88"] = top5[0][1]["Numofsgs"]
+#    ws[column+"89"] = top5[0][1]["Numoffips"]
+#
+#    ws[column+"90"] = top5[1][1]["name"]
+#    ws[column+"91"] = int(top5[1][0])
+#    ws[column+"92"] = top5[1][1]["Numofvpcs"]
+#    ws[column+"93"] = top5[1][1]["Numofsubs"]
+#    ws[column+"94"] = top5[1][1]["Numofsgs"]
+#    ws[column+"95"] = top5[1][1]["Numoffips"]
+#
+#    ws[column+"96"] = top5[2][1]["name"]
+#    ws[column+"97"] = int(top5[2][0])
+#    ws[column+"98"] = top5[2][1]["Numofvpcs"]
+#    ws[column+"99"] = top5[2][1]["Numofsubs"]
+#    ws[column+"100"] = top5[2][1]["Numofsgs"]
+#    ws[column+"101"] = top5[2][1]["Numoffips"]
+#
+#    ws[column+"102"] = top5[3][1]["name"]
+#    ws[column+"103"] = int(top5[3][0])
+#    ws[column+"104"] = top5[3][1]["Numofvpcs"]
+#    ws[column+"105"] = top5[3][1]["Numofsubs"]
+#    ws[column+"106"] = top5[3][1]["Numofsgs"]
+#    ws[column+"107"] = top5[3][1]["Numoffips"]
+#
+#    ws[column+"108"] = top5[4][1]["name"]
+#    ws[column+"109"] = int(top5[4][0])
+#    ws[column+"110"] = top5[4][1]["Numofvpcs"]
+#    ws[column+"111"] = top5[4][1]["Numofsubs"]
+#    ws[column+"112"] = top5[4][1]["Numofsgs"]
+#    ws[column+"113"] = top5[4][1]["Numoffips"]
+#
+#    wb.save(xlfile)
+#
+#def populate_totcustomer_data(xlfile, column):
+#
+#    if xlfile == None or column == None:
+#        print "Missing parameters"
+#        return None
+#
+#    try:
+#        wb = load_workbook(xlfile)
+#    except:
+#        print "Unable to load workbook {}".format(xlfile)
+#        return None
+#
+#    try:
+#        ws = wb.get_sheet_by_name("VPC")
+#    except:
+#        print "Unable to find or open sheet VPC"
+#        return None
+#
+#    ws[column+"19"] = int(ws[column+"5"].value) + int(ws[column+"12"].value) 
+#    ws[column+"20"] = int(ws[column+"6"].value) + int(ws[column+"13"].value) 
+#    ws[column+"23"] = int(ws[column+"9"].value) + int(ws[column+"16"].value) 
+#    ws[column+"24"] = int(ws[column+"10"].value) + int(ws[column+"17"].value) 
+#    ws[column+"25"] = float(ws[column+"24"].value)/int(ws[column+"23"].value)
+#    ws[column+"37"] = int(ws[column+"33"].value) + int(ws[column+"29"].value) 
+#    ws[column+"39"] = float(ws[column+"37"].value)/int(ws[column+"19"].value)
+#    ws[column+"51"] = int(ws[column+"47"].value) + int(ws[column+"43"].value) 
+#    ws[column+"53"] = float(ws[column+"51"].value)/int(ws[column+"37"].value)
+#    ws[column+"65"] = int(ws[column+"61"].value) + int(ws[column+"57"].value) 
+#    ws[column+"67"] = float(ws[column+"65"].value)/int(ws[column+"37"].value)
+#    ws[column+"79"] = int(ws[column+"75"].value) + int(ws[column+"71"].value) 
+#    ws[column+"81"] = float(ws[column+"79"].value)/int(ws[column+"19"].value)
+#
+#    wb.save(xlfile)
+#
+def main(argv):
+    print 'Harsh'
+    hello.start()
+#    xlfile = None
+#    internal_sheet  = "Internal_Customer_ID"
+#    external_sheet  = "External_Customer_ID"
+#    internal_cells  = None
+#    external_cells  = None
+#    column          = None
+#    summary         = False
+#    debug           = False
+#    ipop            = False
+#    epop            = False
+#
+#    try:
+#        opts, args = getopt.getopt(argv, "hw:e:i:E:I:c:sD", ["help", "workbook=", "esheet=", "isheet=", "ecells=", "icells=", "column=", "summary", "debug"])
+#    except getopt.GetoptError:
+#        help_display()
+#        sys.exit(2)
+#
+#    for opt, arg in opts:
+#
+#        if opt in ("-h", "--help"):
+#            help_display()
+#            sys.exit()
+#        elif opt in ("-w", "--workbook"):
+#            xlfile = arg
+#        elif opt in ("-e", "--esheet"):
+#            external_sheet = arg
+#        elif opt in ("-i", "--isheet"):
+#            internal_sheet = arg
+#        elif opt in ("-E", "--ecells"):
+#            external_cells = arg
+#        elif opt in ("-I", "--icells"):
+#            internal_cells = arg
+#        elif opt in ("-c", "--column"):
+#            column = arg
+#        elif opt in ("-s", "--summary"):
+#            summary = True
+#        elif opt in ("-D", "--debug"):
+#            debug = True
+#
+#    if xlfile == None:
+#        print "Excel file path missing. Unable to process"
+#
+#    if internal_sheet != None and internal_cells != None:
+#        print "Processing internal customer data ==>"
+#        print "#############################################################################"
+#        custdata = retrieve_custlist_stat_from_sheet(xlfile, internal_sheet, internal_cells, debug)
+#        if summary == False and column != None:
+#            ipop = True
+#            print "Populating the excel sheet with the data"
+#            populate_intcustomer_data(xlfile, custdata, column)
+#
+#    if external_sheet != None and external_cells != None:
+#        print "Processing external customer data ==>"
+#        print "#############################################################################"
+#        custdata = retrieve_custlist_stat_from_sheet(xlfile, external_sheet, external_cells, debug)
+#        if summary == False and column != None:
+#            epop = True
+#            print "Populating the excel sheet with the data"
+#            populate_extcustomer_data(xlfile, custdata, column)
+#
+#    if summary == False and ipop == True and epop == True:
+#        populate_totcustomer_data(xlfile, column)
+#
+#
+if __name__ == "__main__":
+    main(sys.argv[1:])
