@@ -1,0 +1,16 @@
+test_vpc_create_delete (myrally.test.concurrent_test.ConcurrentVPCTest) ... FAIL
+
+======================================================================
+FAIL: test_vpc_create_delete (myrally.test.concurrent_test.ConcurrentVPCTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vagrant/package/myrally/test/concurrent_test.py", line 70, in test_vpc_create_delete
+    vpc_id = self.create_vpc()
+  File "/home/vagrant/package/myrally/test/concurrent_test.py", line 45, in create_vpc
+    self.assertEqual(200, resp['status'])
+AssertionError: 200 != 500
+
+----------------------------------------------------------------------
+Ran 1 test in 8.806s
+
+FAILED (failures=1)

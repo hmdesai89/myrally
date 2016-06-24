@@ -26,6 +26,7 @@ from myrally.test_client import config
 from myrally.test_client import auth_handler
 import posix_ipc
 from myrally.ipc import queue
+import myrally.initialize
 
 common_headers = {
     'Content-Type': 'application/json',
@@ -64,7 +65,8 @@ def make_request(url, verb, headers, params, path=None, data=None):
     headers.update(common_headers)
 
     mq = queue.get_message_queue()
-    semaphore = posix_ipc.Semaphore('/test_semaphore1',  posix_ipc.O_CREX)
+    name = myrally.initialize.rand_generator()
+    semaphore = posix_ipc.Semaphore('/'+name,  posix_ipc.O_CREX)
     mq.send(semaphore.name)
     semaphore.acquire()
     #semaphore.close()

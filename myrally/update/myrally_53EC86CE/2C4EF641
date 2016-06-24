@@ -1,0 +1,6 @@
+test_subnet_create_delete (myrally.test.concurrent_test.ConcurrentSubnetTest) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 50.295s
+
+OK

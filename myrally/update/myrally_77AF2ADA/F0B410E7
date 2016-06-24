@@ -1,0 +1,6 @@
+test_describe_vpcs_resp (myrally.test.concurrent_test.ConcurrentVPCTest) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 4.887s
+
+OK

@@ -13,3 +13,8 @@ def delete_queue():
 
 def get_message_queue():
    return posix_ipc.MessageQueue(QueueName)
+
+def get_message():
+    mq = queue.get_message_queue()
+    s, _ = mq.receive()
+    return s
