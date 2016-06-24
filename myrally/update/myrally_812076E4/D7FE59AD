@@ -1,6 +1,0 @@
-test_describe_subnet_resp (myrally.test.concurrent_test.DescriberTest) ... ok
-
-----------------------------------------------------------------------
-Ran 1 test in 2.811s
-
-OK

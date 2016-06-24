@@ -1,6 +1,0 @@
-test_vpc_create_delete (myrally.test.concurrent_test.ConcurrentVPCTest) ... ok
-
-----------------------------------------------------------------------
-Ran 1 test in 25.564s
-
-OK
