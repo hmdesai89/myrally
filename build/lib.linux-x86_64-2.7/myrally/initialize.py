@@ -7,21 +7,10 @@ import logging
 import threading
 import time
 import random
-from myrally.dataCrunch import data_crunch
 
 def rand_generator():
     return ''.join(random.choice('0123456789ABCDEF') for i in range(8))
 
-
-
-def setup_logger(logger_name, log_file, level=logging.INFO):
-    l = logging.getLogger(logger_name)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - : %(message)s')
-    fileHandler = logging.FileHandler(log_file, mode='w')
-    fileHandler.setFormatter(formatter)
-
-    l.setLevel(level)
-    l.addHandler(fileHandler)
 
 def main(argv):
 
@@ -30,12 +19,28 @@ def main(argv):
 
 
     # create logger
-    setup_logger('myrally', r'rally.log')
-    setup_logger('myrally_time', r'rally_timestamp.log')
+    LOG_FILENAME = 'blah.log'
+    logging.basicConfig(filename=LOG_FILENAME,
+                        level=logging.WARN,)
+
     logger = logging.getLogger('myrally')
-    tmp_doc='/tmp/myrally_'+rand_generator()
-    os.makedirs(tmp_doc)
-    tmp_doc += '/'
+    #logger.setLevel(logging.DEBUG)
+
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    #ch.setLevel(logging.DEBUG)
+
+    # create formatter
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+    # add formatter to ch
+    ch.setFormatter(formatter)
+
+    # add ch to logger
+    logger.addHandler(ch)
+
+    tmp_doc='/tmp/myrally_'+rand_generator()+'/'
+    print tmp_doc
     
     try:
         fh = open(file_name, 'r')
@@ -43,8 +48,7 @@ def main(argv):
         print "Error: can\'t find file or read data"
 
     doc = yaml.load(fh)
-    logger.info(doc)
-    logger.info("Temporary Directory name is "+tmp_doc)
+    logger.info( doc)
     #try:
     #     parse_dict = json.loads(fh)
 
@@ -53,14 +57,10 @@ def main(argv):
     p = parse.Parser()
     p.start(doc)
     #queue.delete_queue()
-    queue.create_queue()
-    t1 = threading.Thread(target=p.runner_class(p.runner_args).start)
-    t1.start()
+    #queue.create_queue()
     start_test(p, tmp_doc)
-    t1.join()
     logger.info("Main ended")
-    queue.delete_queue()
-    data_crunch.datacrunch()
+    #queue.delete_queue()
     return True
 
    
@@ -68,7 +68,7 @@ def start_test(parser, tmp_doc):
     logger = logging.getLogger('myrally') 
     threader = []
     for info in parser.users:
-        logger.info('Starting thread for user-----')
+        logger.info('Starting thread for user')
         logger.info(info)
         info['tmp_doc'] = tmp_doc
         ut = UserThreading(info)
@@ -90,7 +90,7 @@ class UserThreading(threading.Thread):
         #print kwargs
         #self.test_suit = kwargs['test_suit']
         self.logger = logging.getLogger('myrally')
-        self.logger.info('In the User thread')
+        self.logger.info('In the init')
         return
 
 
@@ -99,10 +99,7 @@ class UserThreading(threading.Thread):
         #Need to change this
         tthreader = []
         for test_suite in self.test_suites :
-            tt = TestThreading( {'test_suite' : test_suite['test_suite'], 
-                         'iterations' : test_suite['iterations'] , 'limit' : test_suite['limit'] ,
-                          'tmp_doc': self.tmp_doc, 'test_cases' : test_suite['test_cases'],
-                          'var' :test_suite['var'], 'user': test_suite['user']})
+            tt = TestThreading( {'test_suite' : test_suite, 'iterations' : 5 , 'limit' : 5 , 'tmp_doc': self.tmp_doc})
             tt.start()
             tthreader.append(tt)
 
@@ -119,33 +116,28 @@ class TestThreading(threading.Thread):
         self.test_suit =  args['test_suite']
         self.iteration = args['iterations']
         self.tmp_doc = args['tmp_doc']
-        self.limit = args['limit']
-        self.test_cases = args['test_cases']
-        self.var = args['var'].copy() # + args['user']
-        self.var.update(args['user'])
-        # print self.user
         #self.test_suit = kwargs['test_suit']
         self.logger = logging.getLogger('myrally')
         self.logger.info('In the test thread')
         self.semaphore = threading.Semaphore( value = args['limit'])
+
         return
 
 
     def run(self) :
         self.logger.info('Starting test thread')
-        for i in  range(self.iteration):
-            if self.limit != 0 :
-                self.semaphore.acquire()
+        i = 0
+        for i in  range(self.iteration) :
+            self.semaphore.acquire()
             thread = threading.Thread(target = self.run_thread)
             thread.start()
+            thread.join() 
 
 
     def run_thread(self) :
         log_file = self.tmp_doc+rand_generator()
         f = open(log_file, "w")
-        _test_suits =  parse.load_test(self.test_cases, self.var)
-        unittest.TextTestRunner(f, verbosity=2).run(_test_suits)  
-        #unittest.TextTestRunner(verbosity=2).run(self.test_suit) 
-        if self.limit != 0 : 
-            self.semaphore.release()
+        unittest.TextTestRunner(f, verbosity=2).run(self.test_suit)  
+        #unittest.TextTestRunner(verbosity=2).run(self.test_suit)  
+        self.semaphore.release()
         f.close()

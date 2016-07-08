@@ -5,6 +5,8 @@ import importlib
 logger = logging.getLogger('myrally')
 import myrally.exception
 
+import pdb
+
 class Parser():
 
 
@@ -12,33 +14,37 @@ class Parser():
        #self.test_suit = []
        #self.test_suit = ''
        self.users = []
-
-
+       self.runner_class = None
+       self.runner_args = None
    
    def start(self,value):
        # test = unittest.TestSuite()
        try :
            for user in value['users']:
                var  = value['environment']
-               var.update(user)
                logger.info(user)
                info = {'user': user}
                suite = []
                for testsuite in value['test_suites'] :
                    test = unittest.TestSuite()
                    logger.info(testsuite)
-                   suite.append({'test_suite' : test, 'iterations' : testsuite['iterations'], 'limit' : testsuite['limit'], 'test_cases' : testsuite, 'var': var})
-                  
+                   suite.append({'test_suite' : test, 'iterations' : testsuite['iterations'], 'limit' : testsuite['limit'], 'test_cases' : testsuite, 'var': var, 'user': user})
                    # This is to test that testcases exist
-                   try :
-                       load_test( testsuite,var)
-                   except AttributeError, e :
-                       raise myrally.exception.ErrorLoadingTest(e)
-                   except :
-                       raise myrally.exception.ErrorCreds() 
+                  # try :
+                   #    load_test( testsuite,user)
+                   #except AttributeError, e :
+                   #    raise myrally.exception.ErrorLoadingTest(e)
+                   #except :
+                   #    print 'Here'
+                   #    raise myrally.exception.ErrorCreds() 
 
                info['test_suites'] =  suite
                self.users.append(info)
+           
+           runner_mod = value['runner']['type'].rsplit('.',1)
+           runner = importlib.import_module(runner_mod[0])
+           self.runner_class = getattr(runner,runner_mod[1])
+           self.runner_args = value['runner']
        except KeyError , e :
            raise myrally.exception.ValueMissing(e) 
                
@@ -55,3 +61,6 @@ def load_test(testsuite,var):
 
     return test
 
+
+def load_runner():
+    return

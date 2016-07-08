@@ -33,12 +33,20 @@ import os
 import argparse
 import exception
 
+#endpoints = {
+#    'vpc'    : 'https://vpc.ind-west-1.jiocloudservices.com/',
+#    'iam'    : 'https://iam.ind-west-1.jiocloudservices.com/',
+#    'rds'    : 'https://rds.ind-west-1.jiocloudservices.com/',
+#    'dss'    : 'https://dss.ind-west-1.jiocloudservices.com/',
+#    'compute': 'https://compute.ind-west-1.jiocloudservices.com/',
+#}
+
 endpoints = {
-    'vpc'    : 'https://vpc.ind-west-1.jiocloudservices.com/',
+    'vpc'    : 'https://network.jiocloud.com',
     'iam'    : 'https://iam.ind-west-1.jiocloudservices.com/',
     'rds'    : 'https://rds.ind-west-1.jiocloudservices.com/',
     'dss'    : 'https://dss.ind-west-1.jiocloudservices.com/',
-    'compute': 'https://compute.ind-west-1.jiocloudservices.com/',
+    'compute': 'http://127.0.0.1:8788/',
 }
 
 config_handler = None
@@ -106,12 +114,12 @@ class ConfigHandler(object):
     2. Access/Secret Key values
     3. Processing general arguments given by user
     """
-    def __init__(self, args=None):
+    def __init__(self, access_key=None, secret_key=None, args=None):
         self.endpoints = endpoints
         self.secure = True
         self.debug = False
-        self.access_key = os.environ.get('ACCESS_KEY')
-        self.secret_key = os.environ.get('SECRET_KEY')
+        self.access_key = access_key or  os.environ.get('ACCESS_KEY')
+        self.secret_key = secret_key or os.environ.get('SECRET_KEY')
         if not self.access_key or not self.secret_key:
             raise exception.UnknownCredentials()
         if args:
@@ -120,6 +128,14 @@ class ConfigHandler(object):
     def get_service_url(self, service):
         service_url_env = service.upper() + "_URL"
         url = os.environ.get(service_url_env, self.endpoints.get(service))
+
+        #if service == 'vpc':
+        #    url = self.vpc_url or url
+
+        #if service == 'compute':
+        #    url = self.compute_url or url
+
+
         return url
 
     def get_access_key(self):

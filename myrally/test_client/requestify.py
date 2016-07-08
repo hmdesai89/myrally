@@ -48,6 +48,19 @@ def make_request(url, verb, headers, params, path=None, data=None):
 
     access_key = config.get_access_key()
     secret_key = config.get_secret_key()
+    print access_key
+    print secret_key
+    ########Keeping flag here############
+    mq = queue.get_message_queue()
+    name = myrally.initialize.rand_generator()
+    semaphore = posix_ipc.Semaphore('/'+name,  posix_ipc.O_CREX)
+    mq.send(semaphore.name)
+    semaphore.acquire()
+    #semaphore.close()
+    semaphore.unlink()
+
+
+
     # Always calculate signature without trailing '/' in url
     if url.endswith('/'):
         url = url[:-1]
@@ -76,7 +89,9 @@ def make_request(url, verb, headers, params, path=None, data=None):
     return send_request(request_string)
 
 def send_request(request_string):
-    return requests.request('GET',request_string)
+    r  = requests.request('GET',request_string)
+    print r.elapsed.total_seconds()
+    return r
     #return requests.request(verb, request_string, data=data,
     #                        verify=config.check_secure(),
     #                        headers=headers) 

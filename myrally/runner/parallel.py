@@ -1,21 +1,18 @@
 from myrally.ipc import queue
 import posix_ipc
+import logging
 
+class myRunner():
 
-class myRunner()
-
-    def __init__():
+    def __init__(self, *args):
         self.mq = queue.get_message_queue()
-        s, _ = mq.receive()
-        #s='/test_semaphore1'
-        semaphore = posix_ipc.Semaphore(s)
-        semaphore.release()
+        self.args = args[0]
 
-    def start():
+    def start(self):
         pass
 
 
-    def request(value=1):
+    def request(self,value=1):
         semas = []
         for i in range(value):
             s, _ = mq.receive()
@@ -23,6 +20,23 @@ class myRunner()
 
         return semas
 
-    def release(semaphore):
+#    def release(semaphore):
+    def release(self, timeout=30):
+        s, _ = self.mq.receive(timeout)
+        #s='/test_semaphore1'
+        semaphore = posix_ipc.Semaphore(s)
         semaphore.release()
+
+class Parallel(myRunner):
+
+    def start(self):
+        try :
+            while True:
+                self.release()
+        except:
+             logging.info('timeout occured')
+
+   # def __init__(self):
+   #     print '------------Class initiated-----------'
+
 
