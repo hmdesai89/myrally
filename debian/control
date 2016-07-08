@@ -1,0 +1,13 @@
+Source: myrally
+Maintainer: Harsh Desai <harsh1.desai@ril.com>
+Section: python
+Priority: optional
+Build-Depends: dh-python, python-setuptools (>= 0.6b3), python-all (>= 2.6.6-3), debhelper (>= 9)
+Standards-Version: 3.9.6
+
+Package: python-myrally
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: Custom framework for concurrent testing with multiple users
+
+

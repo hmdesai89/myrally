@@ -1,0 +1,85 @@
+#!/usr/bin/python
+
+import sys
+import getopt
+#from myrally.test import call
+from myrally import initialize
+##from vpctools import vpc_users as VU
+##from openpyxl import load_workbook
+#
+def help_display():
+    print "\n"
+    print "Usage: myrally <file_name>"
+    print "\n-h or --help\t\thelp"
+
+def main(argv):
+
+    initialize.main(argv)
+
+         
+#    xlfile = None
+#    internal_sheet  = "Internal_Customer_ID"
+#    external_sheet  = "External_Customer_ID"
+#    internal_cells  = None
+#    external_cells  = None
+#    column          = None
+#    summary         = False
+#    debug           = False
+#    ipop            = False
+#    epop            = False
+#
+#    try:
+#        opts, args = getopt.getopt(argv, "hw:e:i:E:I:c:sD", ["help", "workbook=", "esheet=", "isheet=", "ecells=", "icells=", "column=", "summary", "debug"])
+#    except getopt.GetoptError:
+#        help_display()
+#        sys.exit(2)
+#
+#    for opt, arg in opts:
+#
+#        if opt in ("-h", "--help"):
+#            help_display()
+#            sys.exit()
+#        elif opt in ("-w", "--workbook"):
+#            xlfile = arg
+#        elif opt in ("-e", "--esheet"):
+#            external_sheet = arg
+#        elif opt in ("-i", "--isheet"):
+#            internal_sheet = arg
+#        elif opt in ("-E", "--ecells"):
+#            external_cells = arg
+#        elif opt in ("-I", "--icells"):
+#            internal_cells = arg
+#        elif opt in ("-c", "--column"):
+#            column = arg
+#        elif opt in ("-s", "--summary"):
+#            summary = True
+#        elif opt in ("-D", "--debug"):
+#            debug = True
+#
+#    if xlfile == None:
+#        print "Excel file path missing. Unable to process"
+#
+#    if internal_sheet != None and internal_cells != None:
+#        print "Processing internal customer data ==>"
+#        print "#############################################################################"
+#        custdata = retrieve_custlist_stat_from_sheet(xlfile, internal_sheet, internal_cells, debug)
+#        if summary == False and column != None:
+#            ipop = True
+#            print "Populating the excel sheet with the data"
+#            populate_intcustomer_data(xlfile, custdata, column)
+#
+#    if external_sheet != None and external_cells != None:
+#        print "Processing external customer data ==>"
+#        print "#############################################################################"
+#        custdata = retrieve_custlist_stat_from_sheet(xlfile, external_sheet, external_cells, debug)
+#        if summary == False and column != None:
+#            epop = True
+#            print "Populating the excel sheet with the data"
+#            populate_extcustomer_data(xlfile, custdata, column)
+#
+#    if summary == False and ipop == True and epop == True:
+#        populate_totcustomer_data(xlfile, column)
+#
+#
+if __name__ == "__main__":
+    main(sys.argv[1:])

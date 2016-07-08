@@ -1,3 +1,11 @@
+:: How to Install
+
+python setup.py develop
+
+
+
+YAML file eample:
+
 users :
     [ { access_key : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx' ,
       secret_key : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
