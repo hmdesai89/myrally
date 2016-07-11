@@ -5,18 +5,15 @@ from setuptools import setup
 from os.path import splitext
 from os.path import basename
 
+from pip.req import parse_requirements
 
+install_reqs = parse_requirements('requirements.txt', session=False)
+reqs = [str(ir.req) for ir in install_reqs]
 
 #This is a list of files to install, and where
 #(relative to the 'root' dir, where setup.py is)
 #You could be more specific.
 files = ["myrally/*"]
-
-for path in glob('*.py'):
-    print path
-
-print [splitext(basename(path))[0] for path in glob('*.py')]
-print find_packages('.')
 
 setup(name = "myrally",
     version = "0.1.0",
@@ -39,6 +36,7 @@ setup(name = "myrally",
     #'runner' is in the root.
     scripts = ["bin/myrally"],
     long_description = """Really long text here.""" ,
+    install_requires=reqs
     #
     #This next part it for the Cheese Shop, look a little down the page.
     #classifiers = []     

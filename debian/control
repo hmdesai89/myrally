@@ -9,5 +9,5 @@ Package: python-myrally
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}
 Description: Custom framework for concurrent testing with multiple users
-
+  This module helps to create a framework for concurrent testing.
 
