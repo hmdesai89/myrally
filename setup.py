@@ -5,10 +5,22 @@ from setuptools import setup
 from os.path import splitext
 from os.path import basename
 
-from pip.req import parse_requirements
+#from pip.req import parse_requirements
 
-install_reqs = parse_requirements('requirements.txt', session=False)
-reqs = [str(ir.req) for ir in install_reqs]
+#install_reqs = parse_requirements('requirements.txt', session=False)
+#reqs = [str(ir.req) for ir in install_reqs]
+
+
+reqs = ['python_jcsclient == 1.0',
+        'requests == 2.10.0',
+        'setuptools == 20.7.0',
+        'six == 1.10.0',
+        'xmltodict == 0.9.0',
+        'pycrypto == 2.6.1',
+        'posix_ipc == 1.0.0',
+        'PyYAML == 3.11']
+
+
 
 #This is a list of files to install, and where
 #(relative to the 'root' dir, where setup.py is)
