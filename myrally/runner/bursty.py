@@ -5,6 +5,9 @@ from myrally.runner.base import baseRunner
 import time
 import threading
 
+LOG = logging.getLogger('myrally')
+
+
 class Bursty(baseRunner):
 
     def start(self):
@@ -13,13 +16,20 @@ class Bursty(baseRunner):
             burst = self.args['bursty_args']     
             while True:
                 time.sleep(1/rps)
-                semas = self.read(reqs=5)
-                for sema in semas:
-                    t = threading.Thread(target=self.release_single(sema))
-                    t.start()
+                try:
+                    semas = self.read(reqs=5)
+                    for sema in semas:
+                        #sema.release()
+                        t = threading.Thread(target=sema.release())
+                        t.start()
+
+                except:
+                    LOG.info('timeout occured')
+                    self.release(timeout=1)
 
         except:
-             logging.info('timeout occured')
+            LOG.info('Final timeout')
+                    
 
    # def __init__(self):
    #     print '------------Class initiated-----------'

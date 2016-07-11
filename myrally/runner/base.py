@@ -9,6 +9,7 @@ class baseRunner():
         self.args = args[0]
 
     def start(self):
+        print 'starting queue'
         pass
 
 
@@ -30,15 +31,17 @@ class baseRunner():
 
     def read(self, timeout=30, reqs=5):
         sema = []
-       
-        for i in reqs:
+        for i in range(reqs):
             try :
                 s, _ = self.mq.receive(timeout)
                 #s='/test_semaphore1'
                 semaphore = posix_ipc.Semaphore(s)
                 sema.append(semaphore)
             except :
-                return sema
+                for s in sema:
+                    s.release()
+                raise
+                #raise ValueError('A very specific bad thing happened')
         return sema
 
     def realse_single(self, semaphore):
