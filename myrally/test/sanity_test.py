@@ -6,6 +6,8 @@ from jcsclient import clilib
 import unittest
 import time
 import logging
+from random import randinit
+
 
 ### Usage info
 ### Make sure you have sorced openrc and
@@ -35,6 +37,7 @@ class SanityTest(unittest.TestCase):
         logger = logging.getLogger('myrally')
         #LOG_FILENAME = 'sanity_test.log'
 
+        self.rand1=randinit(0,255)
         logger.info( "Calling setup")
         self.vpcId = None
         self.subnetId = None
@@ -44,9 +47,8 @@ class SanityTest(unittest.TestCase):
         self.associateAddressId = None
         self.routeTableId = None
         self.rtbAssocId = None
-
         logger.info('Starting sanity test')
-
+        self.rand2 = randinit(0,257)
 
 
 
@@ -56,7 +58,7 @@ class SanityTest(unittest.TestCase):
         pass
 
     def test_create_vpc(self):
-        resp = self.jclient.vpc.create_vpc(cidr_block='192.168.0.0/24')
+        resp = self.jclient.vpc.create_vpc(cidr_block='192.'+self.rand1+'.'+self.rand2+'.0/24')
         logger.info(resp)
         self.assertEqual(200, resp['status'])
         self.__class__.vpcId = resp['CreateVpcResponse']['vpc']['vpcId']
@@ -64,7 +66,7 @@ class SanityTest(unittest.TestCase):
 
     def test_create_subnet(self):
         if self.__class__.vpcId:
-            resp = self.jclient.vpc.create_subnet(vpc_id = self.vpcId, cidr_block='192.168.0.64/26')
+            resp = self.jclient.vpc.create_subnet(vpc_id = self.vpcId, cidr_block='192.'+self.rand1+'.'+self.rand2+'.64/26')
             logger.info(resp)
             self.assertEqual(200, resp['status'])
             self.__class__.subnetId = resp['CreateSubnetResponse']['subnet']['subnetId']
@@ -74,7 +76,7 @@ class SanityTest(unittest.TestCase):
 
     def test_create_security_group(self):
         if self.__class__.vpcId:
-            resp = self.jclient.vpc.create_security_group(group_name='SanityTest', vpc_id=self.vpcId, description='Unit testcase group')
+            resp = self.jclient.vpc.create_security_group(group_name='SanityTest'+self.rand1, vpc_id=self.vpcId, description='Unit testcase group')
             logger.info(resp)
             self.assertEqual(200, resp['status'])
             self.__class__.securityGroupId = resp['CreateSecurityGroupResponse']['groupId']
