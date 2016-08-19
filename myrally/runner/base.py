@@ -23,14 +23,16 @@ class baseRunner():
 
 #    def release(semaphore):
     def release(self, timeout=30):
+        print 'in release'
         s, _ = self.mq.receive(timeout)
         #s='/test_semaphore1'
         semaphore = posix_ipc.Semaphore(s)
         semaphore.release()
 
 
-    def read(self, timeout=30, reqs=5):
+    def read(self, reqs=5, rps = 1):
         sema = []
+        timeout = 1/rps 
         for i in range(reqs):
             try :
                 s, _ = self.mq.receive(timeout)
@@ -38,9 +40,10 @@ class baseRunner():
                 semaphore = posix_ipc.Semaphore(s)
                 sema.append(semaphore)
             except :
-                for s in sema:
-                    s.release()
-                raise
+                return sema 
+                # for s in sema:
+                #    s.release()
+                #raise
                 #raise ValueError('A very specific bad thing happened')
         return sema
 

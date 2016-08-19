@@ -15,17 +15,18 @@ class Bursty(baseRunner):
             rps = self.args['request_per_second']
             burst = self.args['bursty_args']     
             while True:
-                time.sleep(1/rps)
-                try:
-                    semas = self.read(reqs=5)
-                    for sema in semas:
-                        #sema.release()
-                        t = threading.Thread(target=sema.release())
-                        t.start()
+                time.sleep(float(1)/rps)
+                #try:
+                semas = self.read(reqs=5, rps = rps)
+                for sema in semas:
+                    #sema.release()
+                    t = threading.Thread(target=sema.release())
+                    t.start()
 
-                except:
-                    LOG.info('timeout occured')
-                    self.release(timeout=1)
+                #except:
+                if not semas:
+                    LOG.info('timeout occured in burst size')
+                    self.release(timeout=90)
 
         except:
             LOG.info('Final timeout')

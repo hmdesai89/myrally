@@ -1,0 +1,345 @@
+from myrally.test_client import client
+from myrally.test_client import clilib
+#from jcsclient import client
+#from jcsclient import clilib
+
+import unittest
+import logging
+import time
+from random import randint
+
+### Usage info
+### Make sure you have sorced openrc and
+### you have jcsclient installed before 
+### starting this script
+
+
+
+from random import randint
+
+
+### Usage info
+### Make sure you have sorced openrc and
+### you have jcsclient installed before 
+### starting this script
+
+logger = logging.getLogger('myrally')
+
+
+class SanityTest(unittest.TestCase):
+
+    def __init__(self,*args, **kargs) : #access=None,secret=None,vpc_url = None, compute_url=None):
+        if len(args) > 1 and 'access_key' in args[1] :
+            kwargs =  args[1]
+            a = (args[0])
+            super(SanityTest,self).__init__(a, **kargs)
+        else:
+            print 'in else statement'
+            kwargs  = kargs
+            super(SanityTest,self).__init__(*args, **kargs)
+
+
+        self.jclient = client.Client(**kwargs)#, vpc_url = vpc_url , compute_url = compute_url )
+
+    @classmethod
+    def setUpClass(self):
+        logger = logging.getLogger('myrally')
+        #LOG_FILENAME = 'sanity_test.log'
+
+        logger.info( "Calling setup")
+        self.vpcId = None
+        self.subnetId = None
+        self.securityGroupId = None
+        self.instanceId = None
+        self.allocateAddressId = None
+        self.associateAddressId = None
+        self.routeTableId = None
+        self.rtbAssocId = None
+        logger.info('Starting sanity test')
+        self.rand2 = randint(0,257)
+
+
+    @classmethod
+    def tearDownClass(self):
+        logger.info( "Calling teardown")
+        pass
+
+    def test_sanity(self):
+        self.rand1=randint(0,255)
+        self.rand2=randint(0,255)
+
+        resp = self.jclient.vpc.create_vpc(cidr_block='192.'+str(self.rand1)+'.'+str(self.rand2)+'.0/24')
+        logger.info(resp)
+        self.assertEqual(200, resp['Status'])
+        self.vpcId = resp['CreateVpcResponse']['vpc']['vpcId']
+
+
+        if self.vpcId:
+            resp = self.jclient.vpc.create_subnet(vpc_id = self.vpcId, cidr_block='192.'+str(self.rand1)+'.'+str(self.rand2)+'.64/26')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            self.subnetId = resp['CreateSubnetResponse']['subnet']['subnetId']
+        else:
+            self.fail('Vpc not created')
+
+
+
+        if self.vpcId :
+            resp = self.jclient.vpc.describe_vpcs(vpc_ids=self.vpcId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('VPC not created')
+
+        if self.vpcId:
+            resp = self.jclient.vpc.create_security_group(group_name='SanityTest'+str(self.rand1), vpc_id=self.vpcId, description='Unit testcase group')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            self.securityGroupId = resp['CreateSecurityGroupResponse']['groupId']
+        else:
+            self.fail('Vpc not created')
+
+
+
+
+        if self.subnetId :
+            resp = self.jclient.vpc.describe_subnets(subnet_ids=self.subnetId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('Subnet not created')
+
+
+
+        if self.securityGroupId :
+            resp = self.jclient.vpc.describe_security_groups(group_ids=self.securityGroupId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('SecurityGroup not created')
+
+        if self.vpcId :
+            resp = self.jclient.vpc.describe_vpcs(vpc_ids=self.vpcId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('VPC not created')
+
+
+        if self.securityGroupId :
+            resp = self.jclient.vpc.authorize_security_group_ingress(group_id= self.securityGroupId, protocol='tcp', port='22', cidr = '10.0.0.0/24')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            resp = self.jclient.vpc.authorize_security_group_ingress(group_id= self.securityGroupId, ip_permissions='[{"IpProtocol": "tcp", "FromPort": 22, "ToPort": 22, "IpRanges": [{"CidrIp": "10.0.0.0/0"}, {"CidrIp": "20.0.0.0/0"}]}]')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+
+            resp = self.jclient.vpc.revoke_security_group_ingress(group_id= self.securityGroupId, protocol='tcp', port='22', cidr = '10.0.0.0/24')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            resp = self.jclient.vpc.revoke_security_group_ingress(group_id= self.securityGroupId, ip_permissions='[{"IpProtocol": "tcp", "FromPort": 22, "ToPort": 22, "IpRanges": [{"CidrIp": "10.0.0.0/0"}, {"CidrIp": "20.0.0.0/0"}]}]')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+
+
+
+
+            resp = self.jclient.vpc.authorize_security_group_egress(group_id= self.securityGroupId, protocol='tcp', port='22', cidr = '10.0.0.0/24')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            resp = self.jclient.vpc.authorize_security_group_egress(group_id= self.securityGroupId, ip_permissions='[{"IpProtocol": "tcp", "FromPort": 22, "ToPort": 22, "IpRanges": [{"CidrIp": "10.0.0.0/0"}, {"CidrIp": "20.0.0.0/0"}]}]')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+
+            resp = self.jclient.vpc.revoke_security_group_egress(group_id= self.securityGroupId, protocol='tcp', port='22', cidr = '10.0.0.0/24')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            resp = self.jclient.vpc.revoke_security_group_egress(group_id= self.securityGroupId, ip_permissions='[{"IpProtocol": "tcp", "FromPort": 22, "ToPort": 22, "IpRanges": [{"CidrIp": "10.0.0.0/0"}, {"CidrIp": "20.0.0.0/0"}]}]')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+
+
+
+
+
+        else :
+            self.fail('Security Group not created')
+
+
+
+
+        images = self.jclient.compute.describe_images()['DescribeImagesResponse']['imagesSet']['item']
+        for image in images:
+            if image['name'] == "Ubuntu 14.04":
+                imageId = image['imageId']
+        resp = self.jclient.compute.run_instances(subnet_id=self.subnetId, image_id = imageId , instance_type_id = 'c1.small', block_device_mappings="DeviceName=/dev/vda,DeleteOnTermination=true,VolumeSize=20")
+        logger.info(resp)
+
+
+        self.assertEqual(200, resp['Status'])
+        self.instanceId = resp['RunInstancesResponse']['instancesSet']['item']['instanceId']
+    
+
+        start_time = time.time()
+        while True:
+            resp = self.jclient.compute.describe_instances(instance_ids=self.instanceId)
+            logger.info(resp)
+
+            state = resp['DescribeInstancesResponse'][ 'instancesSet'][ 'item']
+            state = resp['DescribeInstancesResponse'][ 'instancesSet'][ 'item'][ 'instanceState']
+
+            if state =='running':
+                #logger and logger.info(resp)
+                break
+            if (time.time() - start_time) >= 300:
+                #logger and logger.error(resp)
+                logging.error('Instance in pending state')
+                break
+
+
+        if self.instanceId :
+            resp = self.jclient.vpc.allocate_address(domain='vpc')
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            self.allocateAddressId = resp['AllocateAddressResponse']['allocationId']
+        else:
+            self.fail('Instance not created')
+
+
+        if self.allocateAddressId :
+            resp = self.jclient.vpc.associate_address(allocation_id= self.allocateAddressId , instance_id = self.instanceId )
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            self.associateAddressId = resp['AssociateAddressResponse']['associationId']
+        else:
+            self.fail('Address not allcoated')
+
+
+
+        if self.allocateAddressId :
+            resp = self.jclient.vpc.describe_addresses(allocation_ids = self.allocateAddressId )
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('Address not allcoated')
+
+
+
+
+        if self.associateAddressId :
+            resp = self.jclient.vpc.disassociate_address(association_id = self.associateAddressId )
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('Address not associated')
+
+
+
+        if self.allocateAddressId :
+            resp = self.jclient.vpc.release_address(allocation_id= self.allocateAddressId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('Address not allcoated')
+
+
+        if self.instanceId :
+            resp = self.jclient.vpc.create_route_table(vpc_id=self.vpcId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            self.routeTableId = resp['CreateRouteTableResponse']['routeTable']['routeTableId']
+        else:
+            self.fail('Instance not created')
+ 
+        if self.instanceId :
+            resp = self.jclient.vpc.create_route(instance_id=self.instanceId, route_table_id = self.routeTableId, destination_cidr_block = "10.0.0.0/24")
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('Instance not created')
+
+
+        if self.routeTableId :
+            resp = self.jclient.vpc.associate_route_table(route_table_id = self.routeTableId, subnet_id = self.subnetId )
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+            self.rtbAssocId = resp['AssociateRouteTableResponse']['associationId']
+        else:
+            self.fail('RTB not created')
+        
+
+        if self.routeTableId :
+            resp = self.jclient.vpc.describe_route_tables(route_table_ids = self.routeTableId )
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('RTB not created')
+
+        if self.rtbAssocId :
+            resp = self.jclient.vpc.disassociate_route_table(association_id = self.rtbAssocId )
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('RTB not created')
+
+
+        if self.routeTableId :
+            resp = self.jclient.vpc.delete_route( route_table_id = self.routeTableId, destination_cidr_block = "10.0.0.0/24")
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('RTB not created')
+
+
+
+        if self.routeTableId :
+            resp = self.jclient.vpc.delete_route_table(route_table_id = self.routeTableId )
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('RTB not created')
+
+
+
+
+        if self.instanceId :
+            resp = self.jclient.compute.terminate_instances(instance_ids=self.instanceId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('Instance not created')
+
+
+        if self.securityGroupId :
+            resp = self.jclient.vpc.delete_security_group(group_id= self.securityGroupId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else :
+            self.fail('Security Group not created')
+
+
+
+        if self.subnetId :
+            time.sleep(5)
+            resp = self.jclient.vpc.delete_subnet(subnet_id=self.subnetId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('Subnet not created')
+
+
+
+
+
+        if self.vpcId :
+            resp = self.jclient.vpc.delete_vpc(vpc_id=self.vpcId)
+            logger.info(resp)
+            self.assertEqual(200, resp['Status'])
+        else:
+            self.fail('VPC not created')
+
+if __name__ == '__main__':
+    #LOG.info('Initiating test cases: ')
+    test = unittest.TestSuite()
+    test.addTest(SanityTest("test_sanity")) 
+    unittest.TextTestRunner(verbosity=2).run(test)

@@ -14,6 +14,12 @@ import posix_ipc
 from myrally.ipc import queue
 import myrally.initialize
 import logging
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+
+LOGGER = logging.getLogger('myrally_time')
 
 
 
@@ -37,13 +43,18 @@ def make_request(url, verb, headers, params, path=None, data=None, config_handle
     secret_key = config_handler.get_secret_key()
 
 ##  Queue for testing
-    mq = queue.get_message_queue()
-    name = myrally.initialize.rand_generator()
-    semaphore = posix_ipc.Semaphore('/'+name,  posix_ipc.O_CREX)
-    mq.send(semaphore.name)
-    semaphore.acquire()
-    #semaphore.close()
-    semaphore.unlink()
+    try:
+        mq = queue.get_message_queue()
+        name = myrally.initialize.rand_generator()
+        semaphore = posix_ipc.Semaphore('/'+name,  posix_ipc.O_CREX)
+        mq.send(semaphore.name)
+        semaphore.acquire()
+        #semaphore.close()
+        semaphore.unlink()
+    except :
+        print '------------------------EXCEPTION IN SEMAPHORE------------------'
+        raise
+
     # Always calculate signature without trailing '/' in url
     if url.endswith('/'):
         url = url[:-1]
@@ -59,13 +70,19 @@ def make_request(url, verb, headers, params, path=None, data=None, config_handle
     request_string = request_string[:-1]
     global common_headers
     headers.update(common_headers)
-    r = requests.request(verb, request_string, data=data,
+    try :
+        r = requests.request(verb, request_string, data=data,
                             verify=config_handler.check_secure(),
                             headers=headers)
-    
-    logger = logging.getLogger('myrally_time')
-    logger.info('%s - %s ',params['Action'], r.elapsed.total_seconds())
-    #print params['Action'] print r.elapsed.total_seconds()
+
+
+    except Exception as ex:
+        print '--------------------------EXCEPTION IN REQUEST---------------------------------------'
+        print ex
+        LOGGER.info('%s - %s - %s ',params['Action'], '0.00','Exception')
+        raise
+
+    LOGGER.info('%s - %s - %s ',params['Action'], r.elapsed.total_seconds(),r.status_code)
     return r
 
 def wrapper(func, config_handler):

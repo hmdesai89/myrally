@@ -58,7 +58,6 @@ def main(argv):
     t1.start()
     start_test(p, tmp_doc)
     t1.join()
-    logger.info("Main ended")
     queue.delete_queue()
     data_crunch.datacrunch()
     return True
@@ -109,7 +108,7 @@ class UserThreading(threading.Thread):
         for thread in tthreader:
             thread.join()
 
-
+        
 
 class TestThreading(threading.Thread):
 
@@ -128,24 +127,34 @@ class TestThreading(threading.Thread):
         self.logger = logging.getLogger('myrally')
         self.logger.info('In the test thread')
         self.semaphore = threading.Semaphore( value = args['limit'])
+        log_file = self.tmp_doc+rand_generator()
+        self.f = open(log_file, "w")
+        self.threads = []
+        
         return
 
 
     def run(self) :
         self.logger.info('Starting test thread')
+        count  = 0
         for i in  range(self.iteration):
             if self.limit != 0 :
                 self.semaphore.acquire()
             thread = threading.Thread(target = self.run_thread)
+            count += 1
+            self.threads.append(thread)
             thread.start()
+        for t in self.threads :
+            t.join()
 
+        self.f.close()
+        #print '------------------------------------------------------------------------------'
+        #print count
+        #print '------------------------------------------------------------------------------'
 
     def run_thread(self) :
-        log_file = self.tmp_doc+rand_generator()
-        f = open(log_file, "w")
         _test_suits =  parse.load_test(self.test_cases, self.var)
-        unittest.TextTestRunner(f, verbosity=2).run(_test_suits)  
+        unittest.TextTestRunner(self.f, verbosity=2).run(_test_suits)  
         #unittest.TextTestRunner(verbosity=2).run(self.test_suit) 
         if self.limit != 0 : 
             self.semaphore.release()
-        f.close()

@@ -1,0 +1,11 @@
+Package: python-myrally
+Source: myrally
+Version: 0.1.0-1
+Architecture: all
+Maintainer: Harsh Desai <harsh1.desai@ril.com>
+Installed-Size: 273
+Depends: python-crypto, python-jcsclient, python-pkg-resources, python-posix-ipc, python-requests, python-six, python-xmltodict, python-yaml, python:any (<< 2.8), python:any (>= 2.7.5-5~)
+Section: python
+Priority: optional
+Description: Custom framework for concurrent testing with multiple users
+  This module helps to create a framework for concurrent testing.
